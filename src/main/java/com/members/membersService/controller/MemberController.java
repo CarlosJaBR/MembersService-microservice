@@ -8,7 +8,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,7 +26,7 @@ public class MemberController {
 
     
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @PostMapping("")
+    @PostMapping("/")
     @Operation(
         summary = "Add a new member",
         description = "This endpoint allows registering a new member in the system. " +
@@ -39,7 +43,7 @@ public class MemberController {
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @GetMapping("")
+    @GetMapping("/all")
     @Operation(
         summary = "Get all members",
         description = "This endpoint retrieves a list of all members registered in the system. " +
@@ -53,5 +57,12 @@ public class MemberController {
     })
     public List<Member> getAllMembers() {
         return memberService.getAllMembers();
+    }
+    @GetMapping("/debug-token")
+    public ResponseEntity<?> debugToken(@AuthenticationPrincipal Jwt jwt) {
+        if (jwt == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("No se recibió token JWT");
+        }
+        return ResponseEntity.ok(jwt.getClaims());
     }
 }
